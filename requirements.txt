@@ -1,0 +1,9 @@
+streamlit
+scikit-learn
+shap
+pandas
+numpy
+openai
+matplotlib
+python-dotenv
+openpyxl
