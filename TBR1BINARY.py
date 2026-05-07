@@ -25,14 +25,14 @@ st.set_page_config(page_title="Teacher View: EEG Attention + XAI (Binary)", layo
 # CONFIG
 # ==============================
 DATA_PATH_DEFAULT = "/mnt/data/biosensor_data_with_target.csv"
-DATA_PATH_WINDOWS = r"C:\Users\sdawo\Documents\python\biosensor_data_with_target.csv"
+DATA_PATH_WINDOWS = "biosensor_data_with_target.csv"
 DATA_PATH = DATA_PATH_DEFAULT if os.path.exists(DATA_PATH_DEFAULT) else DATA_PATH_WINDOWS
 
 KB_PATH_DEFAULT = "/mnt/data/Attention_Strategies_With_Definitions.xlsx"
-KB_PATH_WINDOWS = r"C:\Users\sdawo\Documents\python\Attention_Strategies_With_Definitions.xlsx"
+KB_PATH_WINDOWS = "Attention_Strategies_With_Definitions.xlsx"
 
 PRED_LOG_PATH_DEFAULT = "/mnt/data/predictions_log.csv"
-PRED_LOG_PATH_WINDOWS = r"C:\Users\sdawo\Documents\python\predictions_log.csv"
+PRED_LOG_PATH_WINDOWS = "predictions_log.csv"
 PRED_LOG_PATH = PRED_LOG_PATH_DEFAULT if os.path.exists("/mnt/data") else PRED_LOG_PATH_WINDOWS
 
 EPS = 1e-9
