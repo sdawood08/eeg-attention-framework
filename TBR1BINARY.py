@@ -736,16 +736,13 @@ try:
                     reason = item.get("reason", "")
                     ev = item.get("evidence_from_kb", "")
                     st.markdown(f"**{i}) {reason}**")
-                    if ev:
-                        st.caption(f"KB evidence: {ev}")
-
+                     
                 st.markdown("### How to apply (with KB evidence)")
                 for i, item in enumerate(llm_result.get("how_to_apply", []), start=1):
                     step = item.get("step", "")
                     ev = item.get("evidence_from_kb", "")
                     st.markdown(f"**Step {i}:** {step}")
-                    if ev:
-                        st.caption(f"KB evidence: {ev}")
+                    
 
                 chosen = find_kb_row_by_strategy_name(kb_level, selected_name)
                 if chosen is None:
