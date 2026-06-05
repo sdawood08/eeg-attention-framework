@@ -1,4 +1,4 @@
-# TBR1_clean_fixed_BINARY.py
+ # TBR1_clean_fixed_BINARY.py
 # Streamlit (Teacher View) — Binary (High vs Low), leakage-safe
 
 import json
@@ -58,24 +58,24 @@ FEATURE_LABELS = {
 
 FEATURE_MEANINGS = {
     "EEG_Beta": {
-        "pos": "Higher beta-related activity was a contributing factor in this prediction.",
-        "neg": "Lower beta-related activity was a contributing factor in this prediction.",
+        "pos": "Higher beta-related activity (often linked to alertness and active thinking).",
+        "neg": "Lower beta-related activity (often linked to reduced alertness or weaker task engagement).",
     },
     "EEG_Theta": {
-        "pos": "Higher theta-related activity was a contributing factor in this prediction.",
-        "neg": "Lower theta-related activity was a contributing factor in this prediction.",
+        "pos": "Higher theta-related activity (often linked to mind wandering or reduced external focus).",
+        "neg": "Lower theta-related activity (often linked to better external task focus).",
     },
     "EEG_Alpha": {
-        "pos": "Higher alpha-related activity was a contributing factor in this prediction.",
-        "neg": "Lower alpha-related activity was a contributing factor in this prediction.",
+        "pos": "Higher alpha-related activity (often linked to relaxed state or reduced external attention).",
+        "neg": "Lower alpha-related activity (often linked to greater task readiness).",
     },
     "EEG_Delta": {
-        "pos": "Higher delta-related activity was a contributing factor in this prediction.",
-        "neg": "Lower delta-related activity was a contributing factor in this prediction.",
+        "pos": "Higher delta-related activity (may reflect fatigue/low arousal depending on context).",
+        "neg": "Lower delta-related activity (less fatigue-related pattern).",
     },
     "EEG_Gamma": {
-        "pos": "Higher gamma-related activity was a contributing factor in this prediction.",
-        "neg": "Lower gamma-related activity was a contributing factor in this prediction.",
+        "pos": "Higher gamma-related activity (may relate to intensive processing and integration).",
+        "neg": "Lower gamma-related activity (less intensive processing signal).",
     },
 }
 
@@ -275,14 +275,35 @@ def cognitive_interpretation_from_shap_dynamic(pred_label: str, top_drivers: lis
 
     if dominant_state == "reduced_attention":
         summary = "The pattern suggests reduced sustained attention and possible mind wandering."
+        explanation = (
+            "Although some signals may individually suggest alertness, "
+            "the combined pattern — particularly elevated Theta alongside other bands — "
+            "outweighs these indicators, producing an overall Low Attention prediction."
+        )
     elif dominant_state == "alert_focus":
-        summary = "The pattern suggests strong alertness and sustained task focus."
+        summary = "The overall EEG profile is consistent with High Attention, though individual signals show mixed patterns."
+        explanation = (
+            "The combined pattern across EEG bands supports sustained task engagement. "
+            "While some signals appear mixed, the overall profile is more consistent with High Attention than Low."
+        )
     elif dominant_state == "relaxed_state":
         summary = "The pattern suggests a more relaxed state that may reduce external task focus."
+        explanation = (
+            "Elevated Alpha alongside other signals produces a pattern associated with reduced external engagement, "
+            "where the brain appears to be in a more internally focused or idle state."
+        )
     elif dominant_state == "fatigue_low_arousal":
-        summary = "The pattern may reflect low arousal/fatigue-like signals that can affect attention."
+        summary = "The pattern may reflect low arousal or fatigue-like signals."
+        explanation = (
+            "Elevated Delta combined with other signals produces a pattern the model associates with "
+            "low arousal, where cognitive resources appear reduced."
+        )
     else:
         summary = "The pattern suggests stronger information processing and integration."
+        explanation = (
+            "Elevated Gamma alongside other signals indicates intensive cognitive processing, "
+            "where the brain appears to be actively integrating information."
+        )
 
     caution = " (This interpretation is moderate and may vary across tasks.)" if strength <= 1 else ""
     reasons = []
@@ -301,6 +322,7 @@ def cognitive_interpretation_from_shap_dynamic(pred_label: str, top_drivers: lis
         f"- **Summary:** {summary}{caution}\n\n"
         "**What signals drove this interpretation?**\n"
         + "\n".join(reasons)
+        + f"\n\n*{explanation}*"
     )
 
 
