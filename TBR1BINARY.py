@@ -228,38 +228,14 @@ def get_global_importance_df(shap_values_all, feature_names):
 
 
 # ==============================
-# TEACHER-FRIENDLY EXPLANATIONS
+# COGNITIVE INTERPRETATION
 # ==============================
-def verbal_explanation_teacher_en(sample, pred_label, top_drivers):
-    age = int(sample["Age"])
-    tbr = float(sample["TBR"])
-    mon = str(sample["Attention_Level_TBR"])
-    lines = [
-        "**Teacher Summary**",
-        f"- Student age: **{age}**",
-        f"- Theta/Beta Ratio (TBR): **{tbr:.2f}**",
-        f"- Monastra (age-adjusted) attention label: **{mon}**",
-        f"- AI predicted attention level: **{pred_label}**",
-        "",
-        "**Why did the AI choose this level?**",
-        "The decision was mainly guided by these brain-signal patterns:",
-    ]
-    for feat, val in top_drivers:
-        label = FEATURE_LABELS.get(feat, feat)
-        impact = "supported" if float(val) > 0 else "reduced support for"
-        lines.append(f"- **{label}**: this signal **{impact}** the predicted level.")
-    lines.append("")
-    lines.append("**Teaching Note:** The recommended strategy is chosen to match the student's current attention state.")
-    return "\n".join(lines)
-
-
 def cognitive_interpretation_from_shap_dynamic(pred_label: str, top_drivers: list):
     if not top_drivers:
         return (
             "**Cognitive Interpretation (SHAP-based)**\n\n"
             f"- **AI Attention Level:** **{pred_label}**\n"
             "- **Summary:** SHAP details are unavailable for this sample.\n\n"
-            "**Teaching hint:** Use short tasks, chunk instructions, and quick check-ins."
         )
     dir_map = {feat: (1 if float(val) > 0 else -1) for feat, val in top_drivers}
     scores = {
@@ -285,39 +261,29 @@ def cognitive_interpretation_from_shap_dynamic(pred_label: str, top_drivers: lis
         scores["fatigue_low_arousal"] += 1
     if dir_map.get("EEG_Gamma") == 1:
         scores["intensive_processing"] += 1
-        dominant_state = max(scores, key=scores.get)
+
+    # FIX 1: dominant_state must be outside the if-block
+    dominant_state = max(scores, key=scores.get)
+
+    # FIX 2: align dominant_state with pred_label for mixed signals
     if pred_label == "High" and dominant_state in ["reduced_attention", "fatigue_low_arousal"]:
         dominant_state = "alert_focus"
     elif pred_label == "Low" and dominant_state == "alert_focus":
         dominant_state = "reduced_attention"
+
     strength = scores[dominant_state]
+
     if dominant_state == "reduced_attention":
         summary = "The pattern suggests reduced sustained attention and possible mind wandering."
-        teaching_hint = (
-            "Use short interactive prompts, chunk tasks, and quick check-ins. "
-            "Try a brief attention reset (stand-stretch, 30-second recap) then re-focus the task."
-        )
     elif dominant_state == "alert_focus":
         summary = "The pattern suggests strong alertness and sustained task focus."
-        teaching_hint = (
-            "Increase cognitive challenge using higher-order questions or problem-based activities. "
-            "Ask the student to explain their reasoning aloud."
-        )
     elif dominant_state == "relaxed_state":
         summary = "The pattern suggests a more relaxed state that may reduce external task focus."
-        teaching_hint = (
-            "Use clear goals and structured steps. Add engaging examples/visuals and frequent prompts to maintain focus."
-        )
     elif dominant_state == "fatigue_low_arousal":
         summary = "The pattern may reflect low arousal/fatigue-like signals that can affect attention."
-        teaching_hint = (
-            "Use shorter tasks with brief breaks and varied activity formats. Reduce cognitive load and pace the lesson."
-        )
     else:
         summary = "The pattern suggests stronger information processing and integration."
-        teaching_hint = (
-            "Use deep-learning activities: concept mapping, connecting ideas, and applied problem solving."
-        )
+
     caution = " (This interpretation is moderate and may vary across tasks.)" if strength <= 1 else ""
     reasons = []
     for feat, val in top_drivers:
@@ -335,12 +301,8 @@ def cognitive_interpretation_from_shap_dynamic(pred_label: str, top_drivers: lis
         f"- **Summary:** {summary}{caution}\n\n"
         "**What signals drove this interpretation?**\n"
         + "\n".join(reasons)
-        + "\n\n"
-     )
+    )
 
-
-# ==============================
- 
 
 # ==============================
 # KB (Strategies) HELPERS
@@ -396,8 +358,6 @@ CONSTRAINTS:
 - Select exactly ONE strategy from the candidates list.
 - Do NOT invent new strategies.
 - Output MUST be valid JSON only.
-- For every reason you give, include a short supporting snippet from the KB definition/description as "evidence_from_kb".
-  Use ONLY the candidate's provided definition/description/reference as evidence.
 
 INPUTS:
 Predicted attention level: {pred_label}
@@ -411,14 +371,14 @@ Return JSON ONLY in this exact structure:
 {{
   "selected_strategy": "<must match exactly one candidate strategy>",
   "why_best": [
-    {{"reason": "<reason 1>", "evidence_from_kb": "<short phrase from candidate definition>"}},
-    {{"reason": "<reason 2>", "evidence_from_kb": "<short phrase from candidate definition>"}},
-    {{"reason": "<reason 3>", "evidence_from_kb": "<short phrase from candidate definition>"}}
+    {{"reason": "<reason 1>"}},
+    {{"reason": "<reason 2>"}},
+    {{"reason": "<reason 3>"}}
   ],
   "how_to_apply": [
-    {{"step": "<step 1>", "evidence_from_kb": "<short phrase if applicable>"}},
-    {{"step": "<step 2>", "evidence_from_kb": "<short phrase if applicable>"}},
-    {{"step": "<step 3>", "evidence_from_kb": "<short phrase if applicable>"}}
+    {{"step": "<step 1>"}},
+    {{"step": "<step 2>"}},
+    {{"step": "<step 3>"}}
   ]
 }}
 """.strip()
@@ -594,13 +554,14 @@ try:
     fig_beeswarm = plt.gcf()
     st.pyplot(fig_beeswarm, clear_figure=True)
 
+except Exception as e:
+    st.warning(f"Global SHAP rendering failed: {e}")
 
 # 3) Local SHAP + Cognitive Interpretation
 st.subheader("🔍 SHAP (Why did the model predict this?)")
 
 top_drivers = []
 cog_text_md = ""
-used_llm = False
 
 try:
     explainer = shap.TreeExplainer(model)
@@ -645,12 +606,18 @@ try:
     fig_waterfall = plt.gcf()
     st.pyplot(fig_waterfall, clear_figure=True)
 
-   
     st.subheader("🧠 Cognitive Interpretation (SHAP-based)")
     cog_text_md = cognitive_interpretation_from_shap_dynamic(pred_label, top_drivers)
     st.markdown(cog_text_md)
 
-
+except Exception as e:
+    st.warning(f"SHAP rendering failed: {e}")
+    cog_text_md = (
+        "**Cognitive Interpretation (SHAP-based)**\n\n"
+        f"- **AI Attention Level:** **{pred_label}**\n"
+        "- **Summary:** SHAP details are unavailable for this sample.\n\n"
+    )
+    st.markdown(cog_text_md)
 
 # 4) Strategy recommendation (KB + optional LLM)
 st.subheader("🎯 Recommended Teaching Strategy")
@@ -686,18 +653,15 @@ try:
             else:
                 st.success(f"LLM Selected Strategy: {selected_name}")
 
-                st.markdown("### Why best (with KB evidence)")
+                st.markdown("### Why best")
                 for i, item in enumerate(llm_result.get("why_best", []), start=1):
                     reason = item.get("reason", "")
                     st.markdown(f"**{i})** {reason}")
-                     
-                     
-                st.markdown("### How to apply (with KB evidence)")
+
+                st.markdown("### How to apply")
                 for i, item in enumerate(llm_result.get("how_to_apply", []), start=1):
                     step = item.get("step", "")
-                   st.markdown(f"**Step {i}:** {step}"
-                    
-                    
+                    st.markdown(f"**Step {i}:** {step}")
 
                 chosen = find_kb_row_by_strategy_name(kb_level, selected_name)
                 if chosen is None:
