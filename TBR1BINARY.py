@@ -647,7 +647,7 @@ try:
     st.markdown(verbal_explanation_teacher_en(sample, pred_label, top_drivers))
 
     st.subheader("🧠 Cognitive Interpretation (SHAP-based)")
-    cog_text_md, used_llm = get_best_cognitive_interpretation(client, pred_label, top_drivers)
+    cog_text_md = cognitive_interpretation_from_shap_dynamic(pred_label, top_drivers)
     st.markdown(cog_text_md)
     if used_llm:
         st.caption("✨ Enhanced with AI for better teacher clarity")
