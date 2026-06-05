@@ -58,24 +58,24 @@ FEATURE_LABELS = {
 
 FEATURE_MEANINGS = {
     "EEG_Beta": {
-        "pos": "Higher beta-related activity (often linked to alertness and active thinking).",
-        "neg": "Lower beta-related activity (often linked to reduced alertness or weaker task engagement).",
+        "pos": "Higher beta-related activity was a contributing factor in this prediction.",
+        "neg": "Lower beta-related activity was a contributing factor in this prediction.",
     },
     "EEG_Theta": {
-        "pos": "Higher theta-related activity (often linked to mind wandering or reduced external focus).",
-        "neg": "Lower theta-related activity (often linked to better external task focus).",
+        "pos": "Higher theta-related activity was a contributing factor in this prediction.",
+        "neg": "Lower theta-related activity was a contributing factor in this prediction.",
     },
     "EEG_Alpha": {
-        "pos": "Higher alpha-related activity (often linked to relaxed state or reduced external attention).",
-        "neg": "Lower alpha-related activity (often linked to greater task readiness).",
+        "pos": "Higher alpha-related activity was a contributing factor in this prediction.",
+        "neg": "Lower alpha-related activity was a contributing factor in this prediction.",
     },
     "EEG_Delta": {
-        "pos": "Higher delta-related activity (may reflect fatigue/low arousal depending on context).",
-        "neg": "Lower delta-related activity (less fatigue-related pattern).",
+        "pos": "Higher delta-related activity was a contributing factor in this prediction.",
+        "neg": "Lower delta-related activity was a contributing factor in this prediction.",
     },
     "EEG_Gamma": {
-        "pos": "Higher gamma-related activity (may relate to intensive processing and integration).",
-        "neg": "Lower gamma-related activity (less intensive processing signal).",
+        "pos": "Higher gamma-related activity was a contributing factor in this prediction.",
+        "neg": "Lower gamma-related activity was a contributing factor in this prediction.",
     },
 }
 
