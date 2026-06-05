@@ -332,8 +332,7 @@ def cognitive_interpretation_from_shap_dynamic(pred_label: str, top_drivers: lis
         "**What signals drove this interpretation?**\n"
         + "\n".join(reasons)
         + "\n\n"
-        f"**Teaching hint:** {teaching_hint}"
-    )
+     )
 
 
 # ==============================
