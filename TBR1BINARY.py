@@ -594,8 +594,6 @@ try:
     fig_beeswarm = plt.gcf()
     st.pyplot(fig_beeswarm, clear_figure=True)
 
-except Exception as e:
-    st.warning(f"Global SHAP rendering failed: {e}")
 
 # 3) Local SHAP + Cognitive Interpretation
 st.subheader("🔍 SHAP (Why did the model predict this?)")
@@ -651,18 +649,8 @@ try:
     st.subheader("🧠 Cognitive Interpretation (SHAP-based)")
     cog_text_md = cognitive_interpretation_from_shap_dynamic(pred_label, top_drivers)
     st.markdown(cog_text_md)
-    if used_llm:
-        st.caption("✨ Enhanced with AI for better teacher clarity")
 
-except Exception as e:
-    st.warning(f"SHAP rendering failed: {e}")
-    cog_text_md = (
-        "**Cognitive Interpretation (SHAP-based)**\n\n"
-        f"- **AI Attention Level:** **{pred_label}**\n"
-        "- **Summary:** SHAP details are unavailable for this sample.\n\n"
-        "**Teaching hint:** Use short tasks, chunk instructions, and quick check-ins."
-    )
-    st.markdown(cog_text_md)
+
 
 # 4) Strategy recommendation (KB + optional LLM)
 st.subheader("🎯 Recommended Teaching Strategy")
@@ -701,11 +689,13 @@ try:
                 st.markdown("### Why best (with KB evidence)")
                 for i, item in enumerate(llm_result.get("why_best", []), start=1):
                     reason = item.get("reason", "")
+                    st.markdown(f"**{i})** {reason}")
                      
                      
                 st.markdown("### How to apply (with KB evidence)")
                 for i, item in enumerate(llm_result.get("how_to_apply", []), start=1):
                     step = item.get("step", "")
+                   st.markdown(f"**Step {i}:** {step}"
                     
                     
 
