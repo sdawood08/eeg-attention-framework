@@ -336,41 +336,7 @@ def cognitive_interpretation_from_shap_dynamic(pred_label: str, top_drivers: lis
 
 
 # ==============================
-# OPTIONAL LLM POLISHING
-# ==============================
-def polish_with_llm(client: OpenAI, base_text: str) -> str:
-    prompt = f"""
-IMPROVE THIS EEG INTERPRETATION FOR TEACHERS:
-
-Original: {base_text}
-
-IMPROVEMENTS NEEDED:
-1. Make it more conversational (use "you" instead of "the teacher")
-2. Add 1 specific, actionable classroom tip
-3. Ensure non-diagnostic language ("suggests" not "indicates")
-4. Keep under 120 words
-5. Maintain the same meaning (do not add new scientific claims)
-
-Return ONLY the improved version:
-""".strip()
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-            max_tokens=250,
-        )
-        return (response.choices[0].message.content or "").strip()
-    except Exception:
-        return base_text
-
-
-def get_best_cognitive_interpretation(client, pred_label, top_drivers):
-    base_text = cognitive_interpretation_from_shap_dynamic(pred_label, top_drivers)
-    if client:
-        return polish_with_llm(client, base_text), True
-    return base_text, False
-
+ 
 
 # ==============================
 # KB (Strategies) HELPERS
