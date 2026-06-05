@@ -285,11 +285,11 @@ def cognitive_interpretation_from_shap_dynamic(pred_label: str, top_drivers: lis
         scores["fatigue_low_arousal"] += 1
     if dir_map.get("EEG_Gamma") == 1:
         scores["intensive_processing"] += 1
-    dominant_state = max(scores, key=scores.get)
+        dominant_state = max(scores, key=scores.get)
     if pred_label == "High" and dominant_state in ["reduced_attention", "fatigue_low_arousal"]:
-    dominant_state = "alert_focus"
-   elif pred_label == "Low" and dominant_state == "alert_focus":
-    dominant_state = "reduced_attention"
+        dominant_state = "alert_focus"
+    elif pred_label == "Low" and dominant_state == "alert_focus":
+        dominant_state = "reduced_attention"
     strength = scores[dominant_state]
     if dominant_state == "reduced_attention":
         summary = "The pattern suggests reduced sustained attention and possible mind wandering."
