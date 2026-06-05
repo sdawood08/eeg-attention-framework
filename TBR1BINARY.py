@@ -648,9 +648,18 @@ try:
             selected_name = validate_llm_choice(llm_result, candidates)
 
             if selected_name is None:
-                st.warning("LLM output invalid. Falling back to first KB strategy.")
-                chosen = kb_level.iloc[0]
-            else:
+                # Retry with stronger constraint (as described in thesis Section 3.6.3)
+                retry_prompt = prompt + (
+                    "\n\nCRITICAL: Your previous response selected a strategy not in the candidate list. "
+                    "You MUST select ONLY from the exact strategy names provided. "
+                    "Return the exact strategy name as it appears in the candidates list."
+                )
+                llm_result = llm_choose_strategy(client, retry_prompt, model_name="gpt-4o-mini")
+                selected_name = validate_llm_choice(llm_result, candidates)
+                if selected_name is None:
+                    st.warning("LLM retry also invalid. Falling back to first KB strategy.")
+                    chosen = kb_level.iloc[0]
+            if selected_name is not None:
                 st.success(f"LLM Selected Strategy: {selected_name}")
 
                 st.markdown("### Why best")
