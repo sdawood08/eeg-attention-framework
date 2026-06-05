@@ -286,6 +286,10 @@ def cognitive_interpretation_from_shap_dynamic(pred_label: str, top_drivers: lis
     if dir_map.get("EEG_Gamma") == 1:
         scores["intensive_processing"] += 1
     dominant_state = max(scores, key=scores.get)
+    if pred_label == "High" and dominant_state in ["reduced_attention", "fatigue_low_arousal"]:
+    dominant_state = "alert_focus"
+elif pred_label == "Low" and dominant_state == "alert_focus":
+    dominant_state = "reduced_attention"
     strength = scores[dominant_state]
     if dominant_state == "reduced_attention":
         summary = "The pattern suggests reduced sustained attention and possible mind wandering."
@@ -643,9 +647,7 @@ try:
     fig_waterfall = plt.gcf()
     st.pyplot(fig_waterfall, clear_figure=True)
 
-    st.subheader("📝 Explanation (Teacher-friendly)")
-    st.markdown(verbal_explanation_teacher_en(sample, pred_label, top_drivers))
-
+   
     st.subheader("🧠 Cognitive Interpretation (SHAP-based)")
     cog_text_md = cognitive_interpretation_from_shap_dynamic(pred_label, top_drivers)
     st.markdown(cog_text_md)
@@ -699,14 +701,12 @@ try:
                 st.markdown("### Why best (with KB evidence)")
                 for i, item in enumerate(llm_result.get("why_best", []), start=1):
                     reason = item.get("reason", "")
-                    ev = item.get("evidence_from_kb", "")
-                    st.markdown(f"**{i}) {reason}**")
+                     
                      
                 st.markdown("### How to apply (with KB evidence)")
                 for i, item in enumerate(llm_result.get("how_to_apply", []), start=1):
                     step = item.get("step", "")
-                    ev = item.get("evidence_from_kb", "")
-                    st.markdown(f"**Step {i}:** {step}")
+                    
                     
 
                 chosen = find_kb_row_by_strategy_name(kb_level, selected_name)
