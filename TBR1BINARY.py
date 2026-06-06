@@ -528,7 +528,7 @@ try:
 
     col1, col2 = st.columns([1.2, 1])
     with col1:
-        fig_global_bar, ax_global_bar = plt.subplots(figsize=(5, 3))
+        fig_global_bar, ax_global_bar = plt.subplots(figsize=(3.5, 2))
         ax_global_bar.barh(
             global_importance_df["Feature"][::-1],
             global_importance_df["MeanAbsSHAP"][::-1],
@@ -564,7 +564,7 @@ try:
         color_bar=True,
         alpha=0.8,
     )
-    plt.gcf().set_size_inches(9, 4)
+    plt.gcf().set_size_inches(6, 3)
     plt.tight_layout()
     plt.savefig(
         "shap_beeswarm_final.png",
